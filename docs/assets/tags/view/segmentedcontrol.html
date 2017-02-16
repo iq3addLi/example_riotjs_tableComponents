@@ -1,0 +1,27 @@
+<segmentedcontrol>
+
+<div class="btn-group">
+    <button each={ buttons } class="btn btn-default" onclick={ doClickButton }>{ title }</button>
+</div>
+
+<script>
+var self = this
+self.buttons = []
+
+// Private
+self.doClickButton = function( event ){
+    self.didClickButton( event.item )
+}
+
+// Public
+self.setButtons = function( buttons ){
+    self.buttons = buttons
+    self.update()
+}
+
+self.didClickButton = function( button ){} // overriden
+
+</script>
+
+
+</segmentedcontrol>

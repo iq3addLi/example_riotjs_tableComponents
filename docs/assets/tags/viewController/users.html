@@ -32,11 +32,7 @@
             <!-- table header -->
             <div class="row">
                 <div class="col-md-9">
-                    <div class="btn-group">
-                        <button type="button" class="btn btn-default" onclick={ doRegistButton }>Create</button>
-                        <button type="button" class="btn btn-default { disabled: tags.tableview.selectedDataSource == null }" onclick={ doEditButton }>Edit</button>
-                        <button type="button" class="btn btn-default { disabled: tags.tableview.selectedDataSource == null }" onclick={ doRemoveButton }>Delete</button>
-                    </div>
+                    <segmentedcontrol />
                 </div>
                 <div class="col-md-3">
                     <div style="text-align: right">
@@ -93,7 +89,8 @@ self.on('mount', function() {
         cache   : false
     })
     .done(function(json){
-        self.setAllUsers(json.users)
+        self.allUsers = json.users
+        self.reloadDisplayUser()
     })
     .fail(function(error){
         console.log(error)
@@ -104,6 +101,12 @@ self.on('mount', function() {
         {"key" : "displayName", title : "Display Name" },
         {"key" : "email", title : "E-mail" }
     ]
+
+    self.tags.segmentedcontrol.setButtons([
+        {"key" : "create", title : "Create"},
+        {"key" : "edit", title : "Edit"},
+        {"key" : "delete", title : "Delete"}
+    ])
 
     // callbacks
     self.tags.tableview.didChangeSort = function( sort ){
@@ -142,15 +145,46 @@ self.on('mount', function() {
             self.reloadDisplayUser()
         })
     }
+
+    self.tags.segmentedcontrol.didClickButton = function( button ){
+        console.log(button)
+        switch(button.key){
+        case "create":
+            self.tags.modalview.newUser()
+            break;
+        case "edit":
+            var user = self.tags.tableview.selectedDataSource
+            if( user == null ) return
+            self.tags.modalview.updateUser(user)
+            break;
+        case "delete":
+            var user = self.tags.tableview.selectedDataSource
+            if( user == null ) return
+            sweetAlert({
+                title  : "Information",
+                text   : "Do you want delete user?",
+                type   : "warning",
+                showCancelButton: true,
+                closeOnConfirm: false
+            }, function(){
+                var index = self.allUsers.indexOf(user)
+                self.allUsers.splice(index,1)
+
+                sweetAlert({
+                    title  : "Information",
+                    text   : "User delete complete.",
+                    type   : "success"
+                }, function(){
+                    self.reloadDisplayUser()
+                })
+            })
+            break;
+        }
+    }
 })
 
 
 // Private
-self.setAllUsers = function(users){
-    self.allUsers = users
-    self.reloadDisplayUser()
-}
-
 self.reloadDisplayUser = function(){    
     var work   = self.allUsers.concat()
 
@@ -192,39 +226,6 @@ self.reloadDisplayUser = function(){
     self.update()
 }
 
-// action
-self.doRegistButton = function(){
-    self.tags.modalview.newUser()
-}
-
-self.doEditButton = function(){
-    var user = self.tags.tableview.selectedDataSource
-    if( user == null ) return
-    self.tags.modalview.updateUser(user)
-}
-
-self.doRemoveButton = function(event){
-    var user = self.tags.tableview.selectedDataSource
-    if( user == null ) return
-    sweetAlert({
-         title  : "Information",
-         text   : "Do you want delete user?",
-         type   : "warning",
-         showCancelButton: true,
-         closeOnConfirm: false
-    }, function(){
-        var index = self.allUsers.indexOf(user)
-        self.allUsers.splice(index,1)
-
-        sweetAlert({
-            title  : "Information",
-            text   : "User delete complete.",
-            type   : "success"
-        }, function(){
-            self.reloadDisplayUser()
-        })
-    })
-}
 
 </script>
 
