@@ -1,0 +1,25 @@
+<tablesummary>
+
+<div>
+    Showing <label>{ (page - 1) * length + 1 }</label> to <label>{ (page * length) > sum ? sum : (page * length) }</label> of <label>{ sum }</label> entries
+</div>
+
+<script>
+
+var self = this
+
+self.page   = 0
+self.length = 0
+self.sum    = 0
+
+// Public
+self.setStatus = function( status ){
+    self.page   = status.page
+    self.length = status.length
+    self.sum    = status.sum
+    self.update()
+}
+
+</script>
+
+</tablesummary>

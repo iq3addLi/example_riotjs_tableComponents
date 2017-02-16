@@ -1,0 +1,27 @@
+<searchbar>
+
+<input name="searchInput" 
+ oninput={ actionOfSearch } 
+ onchange={ actionOfSearch } 
+ type="search" 
+ class="form-control input-sm"
+ placeholder="Search"
+ aria-controls="tb_dtable">
+
+
+<script>
+
+var self = this
+
+self.value = ""
+self.didValueChange = function( word ){}
+
+// searchbar action
+self.actionOfSearch = function(event){
+    self.value = self.searchInput.value
+    self.didValueChange( self.value )
+}
+
+</script>
+
+</searchbar>

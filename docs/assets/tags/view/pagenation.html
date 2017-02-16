@@ -1,0 +1,77 @@
+<pagenation>
+
+<ul class="pagination">
+    <li if={ page != 1 } class="paginate_button previous">
+        <a onclick={ previousPage } >Previous</a>
+    </li>
+    <li each={ pageElement in pageArray() } class="paginate_button { active: page == pageElement }">
+        <a onclick={ selectPage }>{ pageElement }</a>
+    </li>
+    <li if={ sum > page * length }>
+        <a onclick={ nextPage }>Next</a>
+    </li>
+</ul>
+
+<!-- Controller -->
+<script>
+
+var self = this
+
+self.page   = 1
+self.length = 5
+self.sum    = 0
+
+// Private
+self.pageArray = function(){
+    var count = Math.ceil( self.sum / self.length )
+    var array = null
+    if ( count > 10 ){
+        var start = 0
+        if ( self.page + 9 > count ){
+            start = count - 9
+        }else{
+            start = self.page
+        }
+        array = Array.from(new Array(10)).map(function(v,i) { return i + start })
+    }else{
+        array = Array.from(new Array(count)).map(function(v,i) { return i + 1 })
+    }
+    // console.log(array)
+    return array
+}
+
+self.selectPage = function(event){
+    self.setPage(event.item.pageElement)
+}
+
+self.previousPage = function(){
+    self.setPage(self.page - 1)
+}
+
+self.nextPage = function(){
+    self.setPage(self.page + 1)
+}
+
+self.setPage = function(page){
+    self.page = page
+    self.update()
+    self.didChangeCurrentPage( page )
+}
+
+// Public
+self.didChangeCurrentPage = function( newPage ){}
+
+self.setSum = function( sum ){
+    self.sum = sum
+    self.update()
+}
+
+self.setLength = function( length ){
+    self.length = length
+    self.update()
+}
+
+
+</script>
+
+</pagenation>

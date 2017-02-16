@@ -1,0 +1,84 @@
+<modalview>
+
+<!--  remodal create form -->
+<div class="remodal" data-remodal-id="userView">
+    <button data-remodal-action="close" class="remodal-close"></button>
+    <div class="card">
+        <div class="card-header" data-background-color="purple">
+            <h4 class="title">Register</h4>
+        </div>
+        <div class="card-content">
+            <div class="row">
+                <div class="col-md-4">
+                    <div name="form" class="form-group label-floating">
+                        <label class="control-label">Account name</label>
+                        <input name="accountNameInput" type="text" value="" class="form-control"/>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div name="form" class="form-group label-floating">
+                        <label class="control-label">Display name</label>
+                        <input name="displayNameInput" type="text" value="" class="form-control"/>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div name="form" class="form-group label-floating">
+                        <label class="control-label">Email</label>
+                        <input name="emailInput" type="text" value="" class="form-control"/>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <button class="btn btn-info" onclick="{ doRegistUser }">Send</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+var self = this
+
+self.didConformed = function( user ){}
+
+self.newUser = function(){
+    self.accountNameInput.value = ""
+    self.displayNameInput.value = ""
+    self.emailInput.value = ""
+
+    self.showRegistWindow()
+}
+
+self.updateUser = function( user ){
+    self.accountNameInput.value = user.accountName
+    self.displayNameInput.value = user.displayName
+    self.emailInput.value = user.email
+
+    self.showRegistWindow()
+}
+
+self.showRegistWindow = function(){
+    self.userView = $('[data-remodal-id=userView]').remodal()
+    self.userView.settings.hashTracking = false
+    self.userView.open()
+}
+
+self.doRegistUser = function(){
+    var newValue = {
+        accountName: self.accountNameInput.value,
+        displayName: self.displayNameInput.value,
+        email: self.emailInput.value
+    }
+    self.didConformed( newValue )
+}
+
+self.closeView = function(){
+    self.userView.close()
+}
+</script>
+
+</modalview>

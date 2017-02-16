@@ -1,0 +1,73 @@
+<tableview>
+
+<table class="table">
+
+    <!-- header row -->
+    <thead class="text-primary">
+        <th each= { header in headers } onclick= { doChangeSortKey } class= { active: header.key == sort.key }>{ header.title }</th>
+    </thead>
+
+    <!-- body row -->
+    <tbody if= { dataSources.length } >
+    <tr each= { dataSource in dataSources } onclick={ selectedRow } class={ active: dataSource == selectedDataSource }>
+        <td each= { header in headers }>{ dataSource[header.key] }</td>
+    </tr>
+    </tbody>
+
+</table>
+
+<!-- Controller -->
+<script>
+
+// initalize
+var self = this
+
+self.dataSources = []
+self.selectedDataSource = null
+self.sort   = null
+
+// Private
+self.selectedRow = function(event){
+    var dataSource = event.item.dataSource
+    if ( self.selectedDataSource === dataSource ){
+        self.selectedDataSource = null
+    }else{
+        self.selectedDataSource = dataSource
+    }
+    self.didSelectRow( self.selectedDataSource )
+    self.update()
+}
+
+self.doChangeSortKey = function(event){
+    var key = event.item.header.key
+
+    var sort = self.sort
+    if ( sort == null ){
+        sort = {}
+    }
+    
+    if ( sort.asc == false && sort.key == key ){
+        sort = null
+    }
+    else{
+        sort.asc = sort.key == key ? false : true
+        sort.key = key
+    }
+    self.sort = sort
+
+    self.didChangeSort( sort )
+}
+
+// Public
+self.didChangeSort = function( sort ){}
+self.didSelectRow = function( data ){}
+
+self.setDataSources = function( dataSources ){
+    self.dataSources = dataSources
+    self.selectedDataSource = null
+    self.update()
+}
+
+</script>
+
+</tableview>

@@ -1,0 +1,231 @@
+<users>
+
+<!-- UI -->
+<div name="mainPanel" class="main-panel">
+
+    <!-- navbar -->
+    <div class="navbar navbar-default navbar-fixed-top">
+        <div class="container">
+            <div class="navbar-header">
+                <a class="navbar-brand">Example Table</a>
+                <button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#navbar-main">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- content -->
+    <div class="content">
+        <div class="container" style="min-height: 100vh;">
+
+            <!-- title -->
+            <div class="row">
+                <div class="col-md-12">
+                    <br/><br/>
+                    <h1>Users</h1>
+                </div>
+            </div>
+
+            <!-- table header -->
+            <div class="row">
+                <div class="col-md-9">
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-default" onclick={ doRegistButton }>Create</button>
+                        <button type="button" class="btn btn-default { disabled: tags.tableview.selectedDataSource == null }" onclick={ doEditButton }>Edit</button>
+                        <button type="button" class="btn btn-default { disabled: tags.tableview.selectedDataSource == null }" onclick={ doRemoveButton }>Delete</button>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div style="text-align: right">
+                        <searchbar />
+                    </div>
+                </div>
+            </div>
+
+            <!-- table -->
+            <div class="row">
+                <div class="col-md-12">
+                    <tableview />
+                </div>
+            </div>
+
+            <!-- table footer -->
+            <div class="row">
+                <div class="col-md-5">
+                    <tablesummary />
+                </div>
+                <div class="col-md-7">
+                    <div style="text-align: right">
+                        <pagenation />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- modal -->
+        <modalview />
+    </div>    
+</div>
+
+
+<!-- Controller -->
+<script>
+
+// initalize
+var self = this
+
+self.allUsers   = []
+self.users      = []
+
+self.search = null
+
+// Lifecycle
+self.on('mount', function() {
+
+    global.post("changeActiveID", self.opts.identifier )
+
+    $.ajax({
+        url : "assets/json/userlist.json",
+        dataType : "json",
+        cache   : false
+    })
+    .done(function(json){
+        self.setAllUsers(json.users)
+    })
+    .fail(function(error){
+        console.log(error)
+    })
+
+    self.tags.tableview.headers    = [ 
+        {"key" : "accountName", title : "Account Name" },
+        {"key" : "displayName", title : "Display Name" },
+        {"key" : "email", title : "E-mail" }
+    ]
+
+    // callbacks
+    self.tags.tableview.didChangeSort = function( sort ){
+        self.reloadDisplayUser()
+    } 
+
+    self.tags.tableview.didSelectRow = function( data ){
+        self.update()
+    }
+
+    self.tags.pagenation.didChangeCurrentPage = function( page ){
+        self.reloadDisplayUser()
+    }
+
+    self.tags.searchbar.didValueChange = function( value ){
+        self.tags.pagenation.page = 1
+        self.reloadDisplayUser()
+    }
+
+    self.tags.modalview.didConformed = function( newValue ){
+        var user = self.tags.tableview.selectedDataSource
+        if (user) {
+            var index = self.allUsers.indexOf(user)
+            self.allUsers.splice(index,1,newValue)
+        }
+        else{
+            self.allUsers.push(newValue)
+        }
+
+        sweetAlert({
+            title  : "Information",
+            text   : "User regist complete.",
+            type   : "success"
+        },function(){
+            self.tags.modalview.closeView()
+            self.reloadDisplayUser()
+        })
+    }
+})
+
+
+// Private
+self.setAllUsers = function(users){
+    self.allUsers = users
+    self.reloadDisplayUser()
+}
+
+self.reloadDisplayUser = function(){    
+    var work   = self.allUsers.concat()
+
+    var page   = self.tags.pagenation.page
+    var length = self.tags.pagenation.length
+    var search = self.tags.searchbar.value
+    var sort   = self.tags.tableview.sort
+
+    // search
+    if( search != null ){
+        work = work.filter(function(user){
+            return Object.keys(user).filter(function(key){ 
+                return typeof user[key] == "string" ? user[key].indexOf( search ) != -1 : false
+            }).length
+        })
+    }
+
+    // sort
+    if( sort != null ){
+        work = work.sort(function(a,b){
+            if ( sort.asc == true )
+                return a[sort.key] > b[sort.key] ? 1 : -1
+            else 
+                return a[sort.key] < b[sort.key] ? 1 : -1
+        })
+    }
+    self.users = work
+    
+    // update tags
+    var showUsers = work.slice( (page - 1) * length, page * length )
+    var tableview = self.tags.tableview
+    tableview.setDataSources(showUsers)
+    self.tags.pagenation.setSum( self.users.length )
+    self.tags.tablesummary.setStatus( {
+        page : page,
+        length : length,
+        sum : self.users.length
+    })
+    self.update()
+}
+
+// action
+self.doRegistButton = function(){
+    self.tags.modalview.newUser()
+}
+
+self.doEditButton = function(){
+    var user = self.tags.tableview.selectedDataSource
+    if( user == null ) return
+    self.tags.modalview.updateUser(user)
+}
+
+self.doRemoveButton = function(event){
+    var user = self.tags.tableview.selectedDataSource
+    if( user == null ) return
+    sweetAlert({
+         title  : "Information",
+         text   : "Do you want delete user?",
+         type   : "warning",
+         showCancelButton: true,
+         closeOnConfirm: false
+    }, function(){
+        var index = self.allUsers.indexOf(user)
+        self.allUsers.splice(index,1)
+
+        sweetAlert({
+            title  : "Information",
+            text   : "User delete complete.",
+            type   : "success"
+        }, function(){
+            self.reloadDisplayUser()
+        })
+    })
+}
+
+</script>
+
+</users>
