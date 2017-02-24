@@ -1,15 +1,18 @@
 <tableview>
 
-<table class="table">
+<table class="table" style="table-layout: fixed;">
 
     <!-- header row -->
     <thead class="text-primary">
-        <th each= { header in headers } onclick= { doChangeSortKey } class= { active: header.key == sort.key }>{ header.title }</th>
+        <th each= { header in headers } onclick= { doChangeSortKey } class= { info: header.key == sort.key }>
+            { header.title }
+            <span if={ header.key == sort.key } class="glyphicon { sort.asc ? 'glyphicon-sort-by-attributes' : 'glyphicon-sort-by-attributes-alt' }" aria-hidden="true"></span>
+        </th>
     </thead>
 
     <!-- body row -->
     <tbody if= { dataSources.length } >
-    <tr each= { dataSource in dataSources } onclick={ selectedRow } class={ active: dataSource == selectedDataSource }>
+    <tr each= { dataSource in dataSources } onclick={ selectedRow } class={ info: dataSource == selectedDataSource }>
         <td each= { header in headers }>{ dataSource[header.key] }</td>
     </tr>
     </tbody>
